@@ -6,44 +6,9 @@
       "id": "1"
     },
     {
-      "name": "Ad Lovelace",
-      "number": "39-44-5323523",
-      "id": "2"
-    },
-    {
-      "name": "Dan Abramov",
-      "number": "12-43-234345",
-      "id": "3"
-    },
-    {
       "name": "Yoyo Poppendieck",
       "number": "39-23-6423122",
       "id": "4"
-    },
-    {
-      "name": "sanu",
-      "number": "8920482235",
-      "id": "5"
-    },
-    {
-      "name": "sss",
-      "number": "5454",
-      "id": "gcEXBXwDv_M"
-    },
-    {
-      "name": "eee",
-      "number": "23",
-      "id": "TDydgcCrMV4"
-    },
-    {
-      "name": "okayy",
-      "number": "777",
-      "id": "IuBVO6SJZlA"
-    },
-    {
-      "name": "newper",
-      "number": "000",
-      "id": "oFl4I3FCYQ0"
     }
   ],
   "$schema": "./node_modules/json-server/schema.json"
