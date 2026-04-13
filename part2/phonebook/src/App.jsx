@@ -13,7 +13,7 @@ const App = () => {
 
   useEffect(() => {
     axios.get("http://localhost:3001/persons").then((response) => {
-      setPersons(response.data);
+      setPersons(persons.concat(response.data));
     });
   }, []);
 
@@ -38,11 +38,14 @@ const App = () => {
     const personObject = {
       name: newName,
       number: newNumber,
-      id: persons.length + 1,
     };
-    setPersons(persons.concat(personObject));
-    setNewName("");
-    setNewNumber("");
+    axios
+      .post("http://localhost:3001/persons", personObject)
+      .then((response) => {
+        setPersons(persons.concat(response.data));
+        setNewName("");
+        setNewNumber("");
+      });
   };
 
   const filteredPersons = persons.filter((person) => {
