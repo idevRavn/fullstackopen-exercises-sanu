@@ -4,18 +4,40 @@ import Form from "./components/Form";
 import Persons from "./components/Persons";
 import FilteredPerson from "./components/FilteredPerson";
 import personService from "./services/persons";
+import Notification from "./components/Notification";
 
 const App = () => {
   const [persons, setPersons] = useState([]);
   const [newName, setNewName] = useState("");
   const [newNumber, setNewNumber] = useState("");
   const [filterName, setFilterName] = useState("");
+  const [notifyMessage, setNotifyMessage] = useState({
+    type: "",
+    message: null,
+  });
 
   useEffect(() => {
-    personService.getAll().then((initialPersons) => {
-      setPersons(initialPersons);
-    });
+    personService
+      .getAll()
+      .then((initialPersons) => {
+        setPersons(initialPersons);
+      })
+      .catch(() => {
+        setNotifyMessage({
+          type: "error",
+          message: "Failed to fetch persons",
+        });
+      });
   }, []);
+
+  useEffect(() => {
+    if (notifyMessage?.message) {
+      const timer = setTimeout(() => {
+        setNotifyMessage(null);
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [notifyMessage?.message]);
 
   const changeName = (event) => {
     setNewName(event.target.value);
@@ -35,36 +57,75 @@ const App = () => {
       name: newName,
       number: newNumber,
     };
-    if (persons.find((person) => person.name === newName)) {
+    const existingPerson = persons.find((person) => person.name === newName);
+
+    if (existingPerson) {
       if (
         window.confirm(
           `${newName} is already added to phonebook, replace the old number with a new one?`,
         )
       ) {
-        const person = persons.find((person) => person.name === newName);
-        personService.update(person.id, personObject).then((returnedPerson) => {
-          setPersons(
-            persons.map((p) => (p.id !== person.id ? p : returnedPerson)),
-          );
+        personService
+          .update(existingPerson.id, personObject)
+          .then((returnedPerson) => {
+            setNotifyMessage({
+              type: "success",
+              message: `Updated ${newName}'s number`,
+            });
+            setPersons(
+              persons.map((p) =>
+                p.id !== existingPerson.id ? p : returnedPerson,
+              ),
+            );
+            setNewName("");
+            setNewNumber("");
+          })
+          .catch(() => {
+            setNotifyMessage({
+              type: "error",
+              message: `Failed to update ${newName}`,
+            });
+          });
+      }
+    } else {
+      setNotifyMessage({
+        type: "success",
+        message: `Added ${newName}`,
+      });
+      personService
+        .create(personObject)
+        .then((returnedPerson) => {
+          setPersons(persons.concat(returnedPerson));
           setNewName("");
           setNewNumber("");
-          return;
+        })
+        .catch(() => {
+          setNotifyMessage({
+            type: "error",
+            message: `Failed to add ${newName}`,
+          });
         });
-      }
     }
-    personService.create(personObject).then((returnedPerson) => {
-      setPersons(persons.concat(returnedPerson));
-      setNewName("");
-      setNewNumber("");
-    });
   };
 
   const deletePerson = (id) => {
     const person = persons.find((person) => person.id === id);
     if (window.confirm(`Delete ${person.name}?`)) {
-      personService.deletePerson(id).then(() => {
-        setPersons(persons.filter((person) => person.id !== id));
+      setNotifyMessage({
+        type: "success",
+        message: `Deleted ${person.name}`,
       });
+      personService
+        .deletePerson(id)
+        .then(() => {
+          setPersons(persons.filter((person) => person.id !== id));
+        })
+        .catch(() => {
+          setNotifyMessage({
+            type: "error",
+            message: `Failed to delete ${person.name}`,
+          });
+        });
     }
   };
 
@@ -75,6 +136,10 @@ const App = () => {
   return (
     <div>
       <h2>Phonebook</h2>
+      <Notification
+        type={notifyMessage?.type}
+        message={notifyMessage?.message}
+      />
       <Filter filterName={filterName} changeFilter={changeFilter} />
       <h2>Add a new</h2>
       <Form
